@@ -7,5 +7,7 @@ export default defineConfig({
     globals: true,
     root: './',
     include: ['**/*.e2e-spec.ts'],
+    setupFiles: ['./test/setup/load-env.ts'],
+    globalSetup: ['./test/setup/global-setup.ts'],
   },
 });
