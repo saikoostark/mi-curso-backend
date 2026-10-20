@@ -49,6 +49,9 @@ lerna-debug.log*
 .temp
 .tmp
 
+# runtime data (file-based email outbox, etc.)
+/var
+
 # Runtime data
 pids
 *.pid
