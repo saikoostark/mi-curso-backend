@@ -1,0 +1,24 @@
+import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+} from '../../../password/password-policy.js';
+
+/**
+ * Payload for `POST /auth/reset-password`. The full policy is additionally
+ * enforced in the service, where the user's email/username are known.
+ */
+export class ResetPasswordDto {
+  @IsString()
+  @IsNotEmpty()
+  token: string;
+
+  @IsString()
+  @MinLength(PASSWORD_MIN_LENGTH)
+  @MaxLength(PASSWORD_MAX_LENGTH)
+  newPassword: string;
+
+  @IsString()
+  @MinLength(1)
+  passwordConfirm: string;
+}
