@@ -29,7 +29,21 @@
 
 ```bash
 $ npm install
+$ cp .env.example .env   # then fill in real credentials; .env is gitignored
+$ npm run db:migration:run
 ```
+
+## Runtime endpoints
+
+- Swagger UI: `GET /docs` (OpenAPI JSON at `/docs-json`).
+- Liveness: `GET /health` — process-only, no dependency checks.
+- Readiness: `GET /ready` — Postgres + Redis checks, `503` when either is down.
+- Metrics: `GET /metrics` — native JSON process/dependency telemetry, optionally
+  protected by `METRICS_TOKEN`.
+- Authentication: `/auth/*` (register, verify, login, refresh, sessions,
+  password recovery, profile/account and email change).
+- Administration: `/users`, `/groups`, `/attributes` and `/audit-logs` with
+  attribute-based capability guards.
 
 ## Compile and run the project
 
