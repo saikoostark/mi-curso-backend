@@ -1,43 +1,31 @@
-import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { Controller, Get } from '@nestjs/common';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { SkipApiEnvelope } from '../common/http/skip-api-envelope.decorator.js';
+import { HealthResponseDto } from './dto/health-response.dto.js';
 
 /**
- * Minimal readiness check for the database wiring.
+ * Liveness endpoint (`/health`).
  *
- * Will be superseded by the `@nestjs/terminus` health module (database + Redis
- * indicators) once the cache layer lands — see AGENTS.md, "Infrastructure".
+ * Answers `200` with `{ status: 'ok' }` whenever the process can serve
+ * requests. It deliberately pings no dependencies: Postgres and Redis carry
+ * their own health (infrastructure side), the application proves connectivity
+ * at boot (Redis connects on module init) and schema state is owned by
+ * migrations — so a dependency outage does not mark a running process dead.
+ *
+ * The raw body is kept outside the common API envelope: probes read it as
+ * infrastructure data, not as an application resource.
  */
+@ApiTags('Health')
 @Controller('health')
 export class HealthController {
-  constructor(private readonly dataSource: DataSource) {}
-
   /**
-   * Pings the database with `SELECT 1`.
-   *
-   * @returns `200` with `{ status: 'ok', database: 'up', responseTimeMs }` when
-   * the database responds, `503` otherwise.
+   * @returns The liveness report.
    */
   @Get()
-  async check(): Promise<{
-    status: 'ok';
-    database: 'up';
-    responseTimeMs: number;
-  }> {
-    const startedAt = Date.now();
-
-    try {
-      await this.dataSource.query('SELECT 1');
-    } catch {
-      throw new ServiceUnavailableException({
-        status: 'error',
-        database: 'down',
-      });
-    }
-
-    return {
-      status: 'ok',
-      database: 'up',
-      responseTimeMs: Date.now() - startedAt,
-    };
+  @ApiOperation({ summary: 'Liveness probe' })
+  @ApiOkResponse({ type: HealthResponseDto })
+  @SkipApiEnvelope()
+  check(): { status: 'ok' } {
+    return { status: 'ok' };
   }
 }
